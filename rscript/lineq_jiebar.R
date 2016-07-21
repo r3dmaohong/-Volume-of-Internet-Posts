@@ -1,7 +1,5 @@
 ##lineq jieba
 library(rvest)
-library(XML)
-library(RCurl)
 
 lineq_crawler_jiebar <- function(link, forum_name, min = 1,max = 9999999, start.time = paste0('unsetted_',gsub(":","_",Sys.time()))){
   links_data_lineq = {}

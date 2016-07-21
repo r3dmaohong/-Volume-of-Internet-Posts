@@ -1,12 +1,5 @@
 ##yahoo
 library(rvest)
-library(plyr)
-library(XML)
-library(RCurl)
-library(SnowballC)
-library(cluster)   
-library(XML)
-library(RCurl)
 
 yahoo_crawler_jiebar <- function(link,forum_name,min,max,start.time){
   forum_name = forum_name

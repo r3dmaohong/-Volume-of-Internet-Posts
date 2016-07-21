@@ -1,7 +1,5 @@
 ##ptt jieba
 library(rvest)
-library(XML)
-library(RCurl)
 
 ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unlist(gregexpr(pattern ='bbs',link))+4,unlist(gregexpr(pattern ='index',link))-2)) ,min=1 , max=999999, start.time = paste0('¥¼¶ñ¼g_',gsub(":","_",Sys.time()))){
   links_data_ptt = {}
