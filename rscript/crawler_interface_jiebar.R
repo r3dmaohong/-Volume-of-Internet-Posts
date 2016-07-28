@@ -3,7 +3,7 @@ gc() ##Free up the memory
 
 original_path <- getwd()
 setwd(file.path('Volume-of-Internet-Posts'))
-dir.create('\\output', showWarnings = FALSE)
+dir.create('output', showWarnings = FALSE)
 
 start.time = gsub(":","_",Sys.time())
 
