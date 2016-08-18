@@ -15,10 +15,12 @@ source('.\\rscript\\yahoo++_jiebar.R', print.eval  = TRUE)
 ##jiebar's main program
 source('.\\rscript\\function\\jiebar-main.R', print.eval  = TRUE)
 
-n = '2016指考落點'
+n = '2015_2016_ptt_tech'
 dir.create(file.path('output\\',n), showWarnings = FALSE)
 
-if(T){
+ptt_crawler_jiebar('https://www.ptt.cc/bbs/Tech_Job/index',,1489,,start.time)
+
+if(F){
   ##2016指考落點
   ##路徑讀取等等要改 有誤
   

@@ -30,7 +30,7 @@ yahoo_crawler_jiebar <- function(link,forum_name,min,max,start.time){
     temp_yahoo_data = c(temp_yahoo_data,temp)
     ##which contains 落點
     gc() #記憶體釋放
-    cat("\r Yahoo Answer Page: ",i, ' ==> ',i/length(links_data_yahoo)*100, '% completed                              ')
+    cat("\r Yahoo Answer article: ",i, ' ==> ',i/length(links_data_yahoo)*100, '% completed                              ')
     Sys.sleep(runif(1,2,5))
     },error=function(e){
       

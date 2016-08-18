@@ -57,16 +57,18 @@ jiebar_n <- function(forum_name,x_data,recent,last){
     x = x[which(nchar(x)>1)]
     ##Remove words with num...(ex. IDs)
     x = x[which(!grepl('[0-9]',x))]
+    x = tolower(x)
     
-    x_df = as.data.frame(x)
-    x_cdf = ddply(x_df , c('x'), nrow)
-    x_cdf = x_cdf[order(-x_cdf$V1),]
+    #x_df = as.data.frame(x,stringsAsFactors=F)
+    x_cdf = data.frame(table(x), stringsAsFactors=F) ##ddply(x_df , c('x'), nrow)
+    x_cdf$x <- as.character(x_cdf$x)
+    x_cdf = x_cdf[order(-x_cdf$Freq),]
     #write.csv(x_cdf,paste0('output/x/',format(Sys.time(), "%Y_%d_%b"),'x_output_tolower_temp.csv'),row.names=F)
     
     ##tolower.. once again
-    x_cdf[,1] = tolower(x_cdf[,1])
-    x_cdf = ddply(x_cdf , c('x'), summarize, sum(V1))
-    x_cdf = x_cdf[order(-x_cdf[,2],x_cdf[,1]),]
+    #x_cdf[,1] = tolower(x_cdf[,1])
+    #x_cdf = ddply(x_cdf , c('x'), summarize, sum(V1))
+    #x_cdf = x_cdf[order(-x_cdf[,2],x_cdf[,1]),]
     
     return(x_cdf)
   }

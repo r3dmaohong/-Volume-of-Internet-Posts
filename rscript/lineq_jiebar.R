@@ -26,9 +26,9 @@ lineq_crawler_jiebar <- function(link, forum_name, min = 1,max = 9999999, start.
   ##temp_lineq_data = {}
   links_data_lineq = unique(links_data_lineq)
   
-  lineq_data = data.frame('Date'=character(),'Content'=character(),stringsAsFactors=F)
+  lineq_data = data.frame('Url'=paste0('http://lineq.tw',links_data_lineq), 'Date'="", 'Content'="",stringsAsFactors=F)
   
-  xrow = 1 ##Start to crawl out the contents...
+  ##Start to crawl out the contents...
   for(i in 1:length(links_data_lineq)){
     tryCatch({
       url = paste0('http://lineq.tw',links_data_lineq[i])
@@ -56,16 +56,14 @@ lineq_crawler_jiebar <- function(link, forum_name, min = 1,max = 9999999, start.
       }
       ##Use it as a sep.
       content_utf8 =  paste0(content_utf8,collapse=';:;:;')
-      lineq_data[xrow,] = c(date_utf8,content_utf8)
-      xrow = xrow + 1 
+      lineq_data[i,2:3] = c(date_utf8,content_utf8)
       gc()
       
-      cat("\r LineQ Page ",i, ' ==> ',i/length(links_data_lineq)*100, '% completed ',paste(replicate(50, " "), collapse = ""))
+      cat("\r LineQ article ",i, ' ==> ',i/length(links_data_lineq)*100, '% completed ',paste(replicate(50, " "), collapse = ""))
       Sys.sleep(runif(1,2,5))
     },error=function(e){
-      cat("\r LineQ Page ",i, ' ==> ',i/length(links_data_lineq)*100, '% failed ',paste(replicate(50, " "), collapse = ""))
+      cat("\r LineQ article ",i, ' ==> ',i/length(links_data_lineq)*100, '% failed ',paste(replicate(50, " "), collapse = ""))
     })
-    
   }
   cat("\n ")
   
@@ -77,6 +75,7 @@ lineq_crawler_jiebar <- function(link, forum_name, min = 1,max = 9999999, start.
   last = gsub('-','',strsplit(toString(Sys.time()),' ')[[1]][1])
   
   lineq_data = unique(lineq_data)
+  print(paste0(forum_name,' : ',nrow(lineq_data),' articles.'))
   
   dir.create(paste0(".\\output\\",n,"\\raw data"), showWarnings = FALSE)
   dir.create(paste0(".\\output\\",n,"\\raw data\\",forum_name), showWarnings = FALSE)

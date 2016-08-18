@@ -1,7 +1,7 @@
 ##ptt jieba
 library(rvest)
 
-ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unlist(gregexpr(pattern ='bbs',link))+4,unlist(gregexpr(pattern ='index',link))-2)) ,min=1 , max=999999, start.time = paste0('¥¼¶ñ¼g_',gsub(":","_",Sys.time()))){
+ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unlist(gregexpr(pattern ='bbs',link))+4,unlist(gregexpr(pattern ='index',link))-2)) ,min=1 , max=9999999, start.time = paste0('¥¼¶ñ¼g_',gsub(":","_",Sys.time()))){
   links_data_ptt = {}
   
   ##Get posts' urls form lists of pages.
@@ -34,9 +34,12 @@ ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unli
   print(paste0('Has Accessed to the last page : Page ', max))
   links_data_ptt <- unique(links_data_ptt)
   
-  ptt_data = data.frame('Date'=character(),'Content'=character(),stringsAsFactors=F)
+  dir.create(paste0(".\\output\\",n,"\\raw data"), showWarnings = FALSE)
+  dir.create(paste0(".\\output\\",n,"\\raw data\\",forum_name), showWarnings = FALSE)
   
-  xrow = 1 ##Start to crawl out the contents...
+  ptt_data = data.frame('Url'=paste0('https://www.ptt.cc',links_data_ptt), 'Date'="", 'Content'="",stringsAsFactors=F)
+  
+  ##Start to crawl out the contents...
   for(i in 1:length(links_data_ptt)){
     tryCatch({
       url = paste0('https://www.ptt.cc',links_data_ptt[i])
@@ -60,27 +63,24 @@ ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unli
       }
       
       #temp = content_css
-      ptt_data[xrow,] = c(date_css, utf8_text_content)
-      xrow = xrow + 1
-      
+      ptt_data[i,2:3] = c(date_css, utf8_text_content)
+            
       gc()
+      write.csv(ptt_data,paste0(".\\output\\",n,"\\raw data\\",forum_name,'\\',forum_name,'_',min,'_',max,'.csv'),row.names=F)
       Sys.sleep(runif(1,2,5))
-      cat("\r PTT Page ",i, ' ==>',i/length(links_data_ptt)*100, '% completed.   ',paste(replicate(50, " "), collapse = ""))
+      cat("\r PTT article ",i, ' ==>',i/length(links_data_ptt)*100, '% completed.   ',paste(replicate(50, " "), collapse = ""))
     }, error = function(e) {
       cat("\n ")
-      print(paste0(forum_name, ' PTT Page',i,' failed. ',i/length(links_data_ptt)*100,'%'))
+      print(paste0(forum_name, ' PTT article',i,' failed. ',i/length(links_data_ptt)*100,'%'))
       Sys.sleep(runif(1,2,5))
     })
-    
   }
   cat("\n ")
-  print(paste0(forum_name,' : ',length(ptt_data),' pages.'))
+  print(paste0(forum_name,' : ',nrow(ptt_data),' articles.'))
   
   ptt_data = unique(ptt_data)
   
-  dir.create(paste0(".\\output\\",n,"\\raw data"), showWarnings = FALSE)
-  dir.create(paste0(".\\output\\",n,"\\raw data\\",forum_name), showWarnings = FALSE)
-  write.csv(lineq_data,paste0(".\\output\\",n,"\\raw data\\",forum_name,'\\',forum_name,'_',min,'_',max,'.csv'),row.names=F)
+  write.csv(ptt_data,paste0(".\\output\\",n,"\\raw data\\",forum_name,'\\',forum_name,'_',min,'_',max,'.csv'),row.names=F)
     
   ptt_data = ptt_data$Content
   jiebar_n(forum_name,ptt_data,min,max)
