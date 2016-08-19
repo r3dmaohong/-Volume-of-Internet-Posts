@@ -3,6 +3,9 @@
 jiebar_n <- function(forum_name,x_data,recent,last){
   library(jiebaR)
   library(plyr)
+  library(text2vec)
+  library(data.table)
+  
   ##x為yahoo lineq ptt等等..
   ##Import custom words library...
   tmp = read.csv('D:\\abc\\wjhong\\projects\\school_performence_analysis\\__處理後公司名稱.csv',stringsAsFactors=F)
@@ -14,7 +17,7 @@ jiebar_n <- function(forum_name,x_data,recent,last){
   
   #cutter = worker(type  = "mix"，user  = "D:/somefile.xxx")
   #cutter = worker()
-  cutter=worker("tag")
+  cutter=worker("tag", bylines = T)
   #sapply(temp,function(x) new_user_word(cutter,x,"n"))
   for(xj in 1:length(word_DB)){
     new_user_word(cutter,word_DB[xj],"n")
@@ -23,7 +26,7 @@ jiebar_n <- function(forum_name,x_data,recent,last){
   ##Extract words which is noun.
   get_noun = function(x){
     stopifnot(inherits(x,"character"))
-    index = names(res) %in% c("n","nr","nr1","nr2","nrj","nrf","ns","nsf","nt","nz","nl","ng")
+    index = names(x) %in% c("n","nr","nr1","nr2","nrj","nrf","ns","nsf","nt","nz","nl","ng")
     x[index]
   }
   
@@ -35,34 +38,47 @@ jiebar_n <- function(forum_name,x_data,recent,last){
   #x_data = x_data[,2]
   x_data = gsub('[^[:alnum:]]','',x_data)
   
-  for(i in 1:length(x_data)){
-    tryCatch({
-      temp = segment(x_data[i], cutter)
-      res = cutter[x_data[i]]
-      #get_noun(res)
-      jieba_x = c(jieba_x,temp)
-      jieba_x_noun = c(jieba_x_noun, get_noun(res))
-      cat("\r ",forum_name," jiebar : ",i/length(x_data) * 100, '% completed',paste(replicate(50, " "), collapse = ""))
-    }, error = function(e) {
-      conditionMessage(e) 
-    })
-  }
+  print("Start using cutter...")
+  jieba_x <- lapply(x_data, function(x) cutter <=x)
+  jieba_x <- lapply(jieba_x, '[[', 1)
+  
+  jieba_x_noun <- lapply(jieba_x, function(x) get_noun(unlist(x)))
+  
+  #for(i in 1:length(x_data)){
+  #  tryCatch({
+  #    temp = segment(x_data[i], cutter)
+  #    res = cutter[x_data[i]]
+  #    #get_noun(res)
+  #    jieba_x = c(jieba_x,temp)
+  #    jieba_x_noun = c(jieba_x_noun, get_noun(res))
+  #    cat("\r ",forum_name," jiebar : ",i/length(x_data) * 100, '% completed',paste(replicate(50, " "), collapse = ""))
+  #  }, error = function(e) {
+  #    conditionMessage(e) 
+  #  })
+  #}
   
   cat("\n ")
   
-  
   ##Data extraction
   data_ep <- function(x){
+    a.token <- itoken(x)
+    a.vocab <- create_vocabulary(a.token, ngram=c(1, 1))
+    class(a.vocab$vocab)
+    a.vocab$vocab$terms <- a.vocab$vocab$terms %>% iconv(., "utf8")
+    a.vocab$vocab       <- a.vocab$vocab[order(-a.vocab$vocab$terms_counts),]
+    
+    x_cdf <- a.vocab$vocab
+    
     ##Remove words which nchar==1.
-    x = x[which(nchar(x)>1)]
+    x_cdf = x_cdf[which(nchar(x_cdf$terms)>1),]
     ##Remove words with num...(ex. IDs)
-    x = x[which(!grepl('[0-9]',x))]
-    x = tolower(x)
+    #x = x[which(!grepl('[0-9]',x))]
+    #x = tolower(x)
     
     #x_df = as.data.frame(x,stringsAsFactors=F)
-    x_cdf = data.frame(table(x), stringsAsFactors=F) ##ddply(x_df , c('x'), nrow)
-    x_cdf$x <- as.character(x_cdf$x)
-    x_cdf = x_cdf[order(-x_cdf$Freq),]
+    #x_cdf = data.frame(table(x), stringsAsFactors=F) ##ddply(x_df , c('x'), nrow)
+    #x_cdf$x <- as.character(x_cdf$x)
+    #x_cdf = x_cdf[order(-x_cdf$Freq),]
     #write.csv(x_cdf,paste0('output/x/',format(Sys.time(), "%Y_%d_%b"),'x_output_tolower_temp.csv'),row.names=F)
     
     ##tolower.. once again
@@ -72,9 +88,13 @@ jiebar_n <- function(forum_name,x_data,recent,last){
     
     return(x_cdf)
   }
+  ##用新方法處理與輸出
+  ##再挑出col去做原本的剃除
   
   jieba_x_cdf = data_ep(jieba_x)
   jieba_x_n_cdf = data_ep(jieba_x_noun)
+  setDF(jieba_x_cdf)
+  setDF(jieba_x_n_cdf)
   
   dir.create(paste0(".\\output\\",n,"\\after jiebar"), showWarnings = FALSE)
   dir.create(paste0(".\\output\\",n,"\\after jiebar\\",forum_name), showWarnings = FALSE)
@@ -88,7 +108,7 @@ jiebar_n <- function(forum_name,x_data,recent,last){
   tmp3 = rbind(tmp,tmp2)
   
   if(exists('jieba_x_cdf')){
-    inter_list= intersect(jieba_x_cdf[,1],word_DB)
+    inter_list <- intersect(jieba_x_cdf[,1],word_DB)
     x2 = jieba_x_cdf[which(jieba_x_cdf[,1] %in% inter_list),]
     
     ##Word which should be removed. 
@@ -97,8 +117,9 @@ jiebar_n <- function(forum_name,x_data,recent,last){
     x2 = x2[which(!(x2[,1] %in% word_remove)),]
 
     write.csv(x2,paste0(".\\output\\",n,"\\raw data",'\\',forum_name,'_',recent,'_',last,'交集結果.csv'),row.names=F)
-    print(paste0(forum_name,'Chinese text segmentation and keyword extraction Completed.'))
-  }else if(exists('jieba_x_n_cdf')){
+    print(paste0(forum_name, ' Chinese text segmentation and keyword extraction Completed.'))
+  }
+  if(exists('jieba_x_n_cdf')){
     inter_list= intersect(jieba_x_n_cdf[,1],word_DB)
     x2 = jieba_x_n_cdf[which(jieba_x_n_cdf[,1] %in% inter_list),]
     
@@ -109,7 +130,8 @@ jiebar_n <- function(forum_name,x_data,recent,last){
     #dir.create(, showWarnings = FALSE)
     write.csv(x2,paste0(".\\output\\",n,"\\raw data",'\\',forum_name,'_',recent,'_',last,'交集結果.csv'),row.names=F)
     print(paste0(forum_name,' Chinese text segmentation and keyword extraction Completed.'))
-  }else{
+  }
+  if(!exists('jieba_x_n_cdf') & !exists('jieba_x_cdf')){
     print("jiebar failed")
   }
   

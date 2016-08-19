@@ -71,7 +71,7 @@ ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unli
       cat("\r PTT article ",i, ' ==>',i/length(links_data_ptt)*100, '% completed.   ',paste(replicate(50, " "), collapse = ""))
     }, error = function(e) {
       cat("\n ")
-      print(paste0(forum_name, ' PTT article',i,' failed. ',i/length(links_data_ptt)*100,'%'))
+      print(paste0(forum_name, ' PTT article ',i,' failed. ',i/length(links_data_ptt)*100,'%'))
       Sys.sleep(runif(1,2,5))
     })
   }
