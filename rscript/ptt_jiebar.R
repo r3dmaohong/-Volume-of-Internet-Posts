@@ -37,7 +37,7 @@ ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unli
   dir.create(paste0(".\\output\\",n,"\\raw data"), showWarnings = FALSE)
   dir.create(paste0(".\\output\\",n,"\\raw data\\",forum_name), showWarnings = FALSE)
   
-  ptt_data = data.frame('Url'=paste0('https://www.ptt.cc',links_data_ptt), 'Date'="", 'Content'="",stringsAsFactors=F)
+  ptt_data = data.frame('Url'=paste0('https://www.ptt.cc',links_data_ptt), 'Date'="", 'Content'="", 'Reply'="", 'Title'="", stringsAsFactors=F)
   
   ##Start to crawl out the contents...
   for(i in 1:length(links_data_ptt)){
@@ -45,11 +45,13 @@ ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unli
       url = paste0('https://www.ptt.cc',links_data_ptt[i])
       total_css = read_html(url) 
       
-      content_css = total_css %>% html_nodes("#main-content") %>% html_text()
+      content_css       <- total_css %>% html_nodes("#main-content") %>% html_text()
       utf8_text_content <- iconv(content_css,'utf8')
       
-      date_css = total_css %>% html_nodes(".article-meta-value") %>% html_text()
-      date_css = date_css[4]
+      meta_css  <- total_css %>% html_nodes(".article-meta-value") %>% html_text()
+      date_css  <- meta_css[4]
+      title_css <- meta_css[3]
+      reply_css <- total_css %>% html_nodes(".push-content") %>% html_text() %>% iconv(., 'utf8') %>% paste(., collapse="\n")
       
       ##Remove IDs
       id_css = total_css %>% html_nodes("span") %>% html_text()
@@ -63,7 +65,7 @@ ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unli
       }
       
       #temp = content_css
-      ptt_data[i,2:3] = c(date_css, utf8_text_content)
+      ptt_data[i,2:5] = c(date_css, utf8_text_content, reply_css, title_css)
             
       gc()
       write.csv(ptt_data,paste0(".\\output\\",n,"\\raw data\\",forum_name,'\\',forum_name,'_',min,'_',max,'.csv'),row.names=F)
