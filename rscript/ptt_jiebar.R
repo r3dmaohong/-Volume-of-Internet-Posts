@@ -50,7 +50,7 @@ ptt_crawler_jiebar <- function(link, forum_name = paste0('ptt ',substr(link,unli
       
       meta_css  <- total_css %>% html_nodes(".article-meta-value") %>% html_text()
       date_css  <- meta_css[4]
-      title_css <- meta_css[3]
+      title_css <- meta_css[3] %>% iconv(., 'utf8')
       reply_css <- total_css %>% html_nodes(".push-content") %>% html_text() %>% iconv(., 'utf8') %>% paste(., collapse="\n")
       
       ##Remove IDs
