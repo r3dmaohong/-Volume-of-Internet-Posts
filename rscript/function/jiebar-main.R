@@ -8,11 +8,11 @@ jiebar_n <- function(forum_name,x_data,recent,last){
   
   ##x為yahoo lineq ptt等等..
   ##Import custom words library...
-  tmp     <- read.csv('D:\\abc\\wjhong\\projects\\school_performence_analysis\\__處理後公司名稱.csv',stringsAsFactors=F)
+  tmp     <- read.csv('..\\school_performence_analysis\\__處理後公司名稱.csv',stringsAsFactors=F)
   temp    <- unique(c(tmp$company,tmp$最終比對結果))
-  tmp2    <- read.csv('D:\\abc\\wjhong\\projects\\school_performence_analysis\\學校名稱正規化表格.csv',stringsAsFactors=F)
-  temp    <-  unique(c(temp,tmp2$trim後原始,tmp2$對應表))
-  temp    <- c(temp, read.csv('D:\\abc\\wjhong\\projects\\Volume-of-Internet-Posts\\terms_DB.csv',stringsAsFactors=F)[,1])
+  tmp2    <- read.csv('..\\school_performence_analysis\\學校名稱正規化表格.csv',stringsAsFactors=F)
+  temp    <- unique(c(temp,tmp2$trim後原始,tmp2$對應表))
+  temp    <- c(temp, read.csv('..\\Volume-of-Internet-Posts\\terms_DB.csv',stringsAsFactors=F)[,1])
   word_DB <- tolower(temp)
   #write.table(temp, file="D:\\abc\\wjhong\\projects\\合併詞庫.txt", row.names=FALSE, col.names=FALSE)
   
